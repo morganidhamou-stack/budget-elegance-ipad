@@ -1,0 +1,1 @@
+Correctif pour le depot GitHub Pages budget-elegance-ipad. Copier les 3 fichiers aux memes emplacements dans le projet PWA. Conserver le vite.config.js corrige precedemment. Puis lancer npm run build.

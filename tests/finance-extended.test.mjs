@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {monthData, balanceAt, savingsAt, savingsAvailableBefore, validateSavingsLedger, validDate, recurringAmount, monthPosition, annualHistory, reconciliation,validateImport} from '../src/finance.js';
+const tx=(date,type,amount,id='x')=>({id,date,type,amount,category:'Courses'});
+test('janvier récupère épargne de décembre',()=>{const d={transactions:[tx('2025-12-28','Épargne',350),tx('2026-01-04','Retrait épargne',150)],recurring:[]};assert.equal(savingsAvailableBefore(d,'2026-01-04'),350);assert.equal(monthData(d,2026,0).saving,200);assert.equal(monthData(d,2026,0).balance,-200)});
+test('retrait épargne excessif détecté chronologiquement',()=>{const d={transactions:[tx('2026-01-01','Épargne',50,'a'),tx('2026-01-02','Retrait épargne',100,'b'),tx('2026-01-04','Épargne',100,'c')],recurring:[]};assert.equal(validateSavingsLedger(d).valid,false)});
+test('tarifs changent sans réécrire les mois passés',()=>{const d={transactions:[],recurring:[{type:'Dépense',amount:12,day:10,start:'2026-01-01',rates:[{from:'2026-11-01',amount:15}]}]};assert.equal(monthData(d,2026,9).expense,12);assert.equal(monthData(d,2026,10).expense,15);assert.equal(recurringAmount(d.recurring[0],'2026-10-10'),12)});
+test('aujourd’hui distinct du prévisionnel',()=>{const d={transactions:[tx('2026-10-02','Revenu',1000),tx('2026-10-25','Dépense',250)],recurring:[]};const p=monthPosition(d,2026,9,'2026-10-15');assert.equal(p.actual,1000);assert.equal(p.forecast,750);assert.equal(p.remaining,-250)});
+test('rapprochement ne modifie pas le solde',()=>{const d={balance:100,transactions:[tx('2026-10-01','Dépense',20)],recurring:[]};assert.deepEqual(reconciliation(d,'2026-10-01',75),{date:'2026-10-01',actual:75,expected:80,difference:-5});assert.equal(balanceAt(d,'2026-10-01'),80)});
+test('calendrier valide et année',()=>{assert.equal(validDate('2026-02-30'),false);assert.equal(validDate('2028-02-29'),true);assert.equal(annualHistory({transactions:[],recurring:[]},2026).length,12);assert.throws(()=>validateImport({transactions:[tx('2026-02-30','Dépense',10)],recurring:[]}))});

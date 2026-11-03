@@ -1,0 +1,25 @@
+{
+  "name": "Budget Élégance",
+  "short_name": "Budget Élégance",
+  "description": "Budget personnel hors ligne",
+  "lang": "fr",
+  "start_url": "/budget-elegance-ipad/",
+  "scope": "/budget-elegance-ipad/",
+  "display": "standalone",
+  "background_color": "#fff8fa",
+  "theme_color": "#805572",
+  "icons": [
+    {
+      "src": "/budget-elegance-ipad/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/budget-elegance-ipad/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

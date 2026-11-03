@@ -1,0 +1,7 @@
+// Local, asynchronous storage for the iPad PWA. No financial data is sent to a server.
+const DB='budget-elegance-pwa', STORE='snapshots';
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function access(mode,fn){const db=await openDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,mode);const req=fn(tx.objectStore(STORE));req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);tx.onabort=()=>reject(tx.error);})}finally{db.close()}}
+export async function readBudget(){const value=await access('readonly',s=>s.get('data'));if(value!==undefined)return value;const old=localStorage.getItem('budget-elegance');if(old){const parsed=JSON.parse(old);await writeBudget(parsed);return parsed}return null}
+export async function readPrevious(){return (await access('readonly',s=>s.get('previous')))||null}
+export async function writeBudget(value){const db=await openDB();try{await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');const store=tx.objectStore(STORE);const previous=store.get('data');previous.onsuccess=()=>{if(previous.result!==undefined)store.put(previous.result,'previous');store.put(value,'data')};previous.onerror=()=>tx.abort();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}finally{db.close()}}
